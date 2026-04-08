@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>OAB-PI · Podcast Studio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#0A0F1F;color:#EAEAEA;font-family:'Rajdhani',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:5px;height:5px}
+::-webkit-scrollbar-track{background:#0D1426}
+::-webkit-scrollbar-thumb{background:#00D4FF44;border-radius:3px}
+#root{min-height:100vh}
+.nav-btn{background:transparent;border:none;border-bottom:2px solid transparent;color:#7A8EAA;font-family:'Rajdhani',sans-serif;font-size:14px;font-weight:600;letter-spacing:1px;padding:10px 16px;cursor:pointer;border-radius:6px 6px 0 0;transition:all .2s;text-transform:uppercase;display:inline-flex;align-items:center;gap:7px}
+.nav-btn:hover{color:#00D4FF;background:rgba(0,212,255,.08)}
+.nav-btn.active{color:#00D4FF;background:rgba(0,212,255,.12);border-bottom-color:#00D4FF;text-shadow:0 0 8px #00D4FF88}
+.btn{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:1px;cursor:pointer;transition:all .2s;text-transform:uppercase;display:inline-flex;align-items:center;gap:7px;text-decoration:none;border-radius:8px;padding:9px 18px}
+.btn-primary{background:rgba(0,212,255,.12);border:1px solid #00D4FF66;color:#00D4FF}
+.btn-primary:hover{background:rgba(0,212,255,.25);box-shadow:0 0 16px #00D4FF44}
+.btn-ghost{background:transparent;border:1px solid #1E2D45;color:#7A8EAA}
+.btn-ghost:hover{border-color:#00D4FF44;color:#EAEAEA}
+.btn-danger{background:rgba(255,0,60,.1);border:1px solid #FF003C66;color:#FF003C}
+.btn-danger:hover{background:rgba(255,0,60,.2)}
+.card{background:linear-gradient(135deg,#0D1426,#101828);border:1px solid #1E2D45;border-radius:12px;padding:20px;transition:border-color .2s}
+.card:hover{border-color:#00D4FF33}
+.ep-card{background:linear-gradient(135deg,#0D1426ee,#0F1B30ee);border:1px solid #1E2D45;border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.ep-card::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%;background:var(--sc,#00D4FF);box-shadow:0 0 8px var(--sc,#00D4FF)}
+.ep-card:hover{border-color:#00D4FF44;transform:translateY(-1px)}
+.ep-card.dragging{opacity:.45;transform:scale(.97)}
+.stat-card{background:linear-gradient(135deg,#0D1426,#101828);border:1px solid #1E2D45;border-radius:12px;padding:20px;position:relative;overflow:hidden;transition:all .3s}
+.stat-card:hover{border-color:var(--ac,#00D4FF)}
+.k-col{min-height:160px;border-radius:10px;border:1px solid #1E2D45;background:rgba(13,20,38,.6);transition:all .2s;padding:10px}
+.k-col.dover{border-color:#00D4FF66;background:rgba(0,212,255,.06)}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;font-weight:700;letter-spacing:1px;color:#7A8EAA;text-transform:uppercase}
+.field input,.field textarea,.field select,input.bare,select.bare{background:rgba(0,212,255,.05);border:1px solid #1E2D45;border-radius:8px;color:#EAEAEA;font-family:'Rajdhani',sans-serif;font-size:14px;padding:9px 13px;width:100%;transition:all .2s;outline:none}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:#00D4FF55;box-shadow:0 0 0 2px rgba(0,212,255,.1)}
+.field select option,select.bare option{background:#0D1426}
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);backdrop-filter:blur(4px);z-index:100;display:flex;align-items:center;justify-content:center;padding:16px}
+.modal{background:linear-gradient(135deg,#0D1426,#0F1B30);border:1px solid #00D4FF33;border-radius:16px;width:100%;max-width:720px;max-height:92vh;overflow-y:auto;padding:26px;box-shadow:0 0 40px rgba(0,212,255,.15)}
+.tag{display:inline-flex;align-items:center;gap:3px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;letter-spacing:.4px;text-transform:uppercase}
+.orb{font-family:'Orbitron',monospace;font-weight:900;letter-spacing:2px}
+.pbar{height:4px;background:#1E2D45;border-radius:2px;overflow:hidden}
+.pbar-fill{height:100%;border-radius:2px;transition:width .5s ease}
+.grid-stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px}
+.grid-ep{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px}
+.two-col{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:18px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:13px}
+.span2{grid-column:1/-1}
+.avatar{border-radius:50%;background:linear-gradient(135deg,#00D4FF,#7B61FF);display:flex;align-items:center;justify-content:center;font-weight:900;color:#0A0F1F;flex-shrink:0}
+@keyframes slideIn{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:translateX(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+@keyframes scan{0%{top:-2px}100%{top:100vh}}
+.pulse{animation:pulse 2s infinite}
+.toast{position:fixed;bottom:22px;right:22px;z-index:999;padding:13px 22px;border-radius:10px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;animation:slideIn .3s ease}
+.scanline{position:fixed;left:0;right:0;height:2px;background:linear-gradient(transparent,#00D4FF1A,transparent);animation:scan 9s linear infinite;pointer-events:none;z-index:1;top:0}
+@media(max-width:640px){.hide-sm{display:none!important}.form-grid{grid-template-columns:1fr}.span2{grid-column:auto}.modal{padding:16px}.grid-stats{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="module">
+import{h,render,Fragment}from'https://esm.sh/preact@10.22.0';
+import{useState}from'https://esm.sh/preact@10.22.0/hooks';
+import htm from'https://esm.sh/htm@3.1.1';
+const html=htm.bind(h);
+
+const SC={
+  gravado:  {label:'🎙️ Gravado',          color:'#7B61FF',bg:'rgba(123,97,255,.15)'},
+  edicao:   {label:'✂️ Em Edição',         color:'#00D4FF',bg:'rgba(0,212,255,.12)'},
+  alteracao:{label:'🔄 Em Alteração',      color:'#FF9500',bg:'rgba(255,149,0,.12)'},
+  aprovacao:{label:'⏳ Aguard. Aprovação', color:'#FFD600',bg:'rgba(255,214,0,.12)'},
+  pronto:   {label:'📤 Pronto p/ Postagem',color:'#00FF94',bg:'rgba(0,255,148,.12)'},
+  youtube:  {label:'▶️ No YouTube',        color:'#FF003C',bg:'rgba(255,0,60,.12)'},
+  tv:       {label:'📺 Exibido na TV',     color:'#FF6EC7',bg:'rgba(255,110,199,.12)'},
+};
+const SORD=['gravado','edicao','alteracao','aprovacao','pronto','youtube','tv'];
+const USERS=[
+  {id:'ana',   name:'Fabio Holanda', role:'admin',   av:'AB'},
+
+];
+const EPS0=[
+  {id:'ep001',title:'Direito Digital no Século XXI',number:1,description:'Debate sobre os impactos da IA no ordenamento jurídico brasileiro.',status:'youtube',responsible:'ana',guests:["Dr. Paulo Salave'a",'Dra. Marina Sousa'],recordingDate:'2025-03-10',deadlineEdit:'2025-03-20',deadlinePublish:'2025-03-25',driveLink:'https://drive.google.com',youtubeLink:'https://youtube.com',notes:'Episódio piloto. Excelente qualidade de áudio.',history:[{user:'ana',action:'Episódio criado',date:'2025-03-10T10:00:00'},{user:'carlos',action:'Iniciada edição',date:'2025-03-12T14:30:00'},{user:'ana',action:'Aprovado para postagem',date:'2025-03-22T09:00:00'}]},
+  {id:'ep002',title:'OAB e a Reforma Tributária',number:2,description:'Análise das mudanças tributárias e efeitos na advocacia.',status:'aprovacao',responsible:'carlos',guests:['Dr. Fernando Lima'],recordingDate:'2025-03-18',deadlineEdit:'2025-03-28',deadlinePublish:'2025-04-02',driveLink:'https://drive.google.com',youtubeLink:'',notes:'Aguardando revisão final do apresentador.',history:[{user:'lucia',action:'Episódio criado',date:'2025-03-18T11:00:00'},{user:'carlos',action:'Edição concluída',date:'2025-03-25T16:00:00'}]},
+  {id:'ep003',title:'Advocacia Criminal: Desafios Atuais',number:3,description:'Especialistas debatem o sistema penal e garantias do réu.',status:'edicao',responsible:'carlos',guests:['Dra. Renata Alves','Dr. Thiago Costa'],recordingDate:'2025-03-25',deadlineEdit:'2025-04-04',deadlinePublish:'2025-04-10',driveLink:'https://drive.google.com',youtubeLink:'',notes:'',history:[{user:'ana',action:'Episódio criado',date:'2025-03-25T09:30:00'}]},
+  {id:'ep004',title:'Ética na Advocacia Contemporânea',number:4,description:'A ética profissional como pilar da advocacia moderna.',status:'gravado',responsible:'lucia',guests:['Dr. Armando Pires'],recordingDate:'2025-04-01',deadlineEdit:'2025-04-08',deadlinePublish:'2025-04-15',driveLink:'',youtubeLink:'',notes:'Arquivos brutos ainda não enviados ao editor.',history:[{user:'lucia',action:'Episódio criado',date:'2025-04-01T08:00:00'}]},
+  {id:'ep005',title:'Direito de Família: Novas Perspectivas',number:5,description:'Mudanças recentes no direito de família e impactos práticos.',status:'pronto',responsible:'ana',guests:['Dra. Camila Nunes','Dr. João Victor'],recordingDate:'2025-03-22',deadlineEdit:'2025-04-01',deadlinePublish:'2025-04-06',driveLink:'https://drive.google.com',youtubeLink:'',notes:'Pronto! Aguardando slot de publicação.',history:[{user:'ana',action:'Episódio criado',date:'2025-03-22T10:00:00'},{user:'carlos',action:'Edição finalizada',date:'2025-03-30T17:00:00'},{user:'ana',action:'Aprovado',date:'2025-04-01T10:00:00'}]},
+];
+
+const ddiff=d=>{if(!d)return null;const n=new Date();n.setHours(0,0,0,0);const t=new Date(d);t.setHours(0,0,0,0);return Math.ceil((t-n)/864e5)};
+const fmt=d=>{if(!d)return'—';return new Date(d).toLocaleDateString('pt-BR')};
+const fmtT=iso=>{if(!iso)return'';const d=new Date(iso);return d.toLocaleDateString('pt-BR')+' '+d.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})};
+const usr=id=>USERS.find(u=>u.id===id);
+
+function App(){
+  const[eps,setEps]=useState(EPS0);
+  const[view,setView]=useState('dashboard');
+  const[curUser]=useState(USERS[0]);
+  const[modal,setModal]=useState(null);
+  const[fStatus,setFStatus]=useState('all');
+  const[fResp,setFResp]=useState('all');
+  const[search,setSearch]=useState('');
+  const[drag,setDrag]=useState(null);
+  const[toast,setToast]=useState(null);
+  const notify=(msg,type='ok')=>{setToast({msg,type});setTimeout(()=>setToast(null),3000)};
+  const saveEp=ep=>{setEps(p=>p.find(e=>e.id===ep.id)?p.map(e=>e.id===ep.id?ep:e):[...p,ep]);setModal(null);notify('Episódio salvo!')};
+  const delEp=id=>{setEps(p=>p.filter(e=>e.id!==id));setModal(null);notify('Episódio removido.','warn')};
+  const setStatus=(id,status)=>{setEps(p=>p.map(e=>e.id!==id?e:{...e,status,history:[...e.history,{user:curUser.id,action:'Status: '+SC[status].label,date:new Date().toISOString()}]}));notify('Status: '+SC[status].label)};
+  const onDrop=s=>{if(!drag)return;setStatus(drag,s);setDrag(null)};
+  const filt=eps.filter(e=>{if(fStatus!=='all'&&e.status!==fStatus)return false;if(fResp!=='all'&&e.responsible!==fResp)return false;if(search&&!e.title.toLowerCase().includes(search.toLowerCase()))return false;return true});
+  const stats={total:eps.length,by:SORD.reduce((a,s)=>({...a,[s]:eps.filter(e=>e.status===s).length}),{}),late:eps.filter(e=>{const d=ddiff(e.deadlinePublish);return d!==null&&d<0&&e.status!=='youtube'&&e.status!=='tv'}).length};
+  return html`<${Fragment}>
+    <div class="scanline"/>
+    ${toast&&html`<div class="toast" style="background:${toast.type==='warn'?'rgba(255,0,60,.15)':'rgba(0,212,255,.15)'};border:1px solid ${toast.type==='warn'?'#FF003C66':'#00D4FF66'};color:${toast.type==='warn'?'#FF003C':'#00D4FF'}">${toast.type==='warn'?'⚠️':'✓'} ${toast.msg}</div>`}
+    <header style="background:linear-gradient(180deg,#080D1A,#0A0F1F);border-bottom:1px solid #1E2D45;padding:0 20px;display:flex;align-items:center;justify-content:space-between;height:62px;position:sticky;top:0;z-index:50;box-shadow:0 4px 24px rgba(0,0,0,.5)">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div style="display:flex;align-items:center;gap:9px">
+          <div style="width:34px;height:34px;border-radius:8px;background:linear-gradient(135deg,#00D4FF22,#7B61FF22);border:1px solid #00D4FF44;display:flex;align-items:center;justify-content:center;font-size:17px">🎙️</div>
+          <div><div class="orb" style="font-size:12px;color:#00D4FF">OAB-PI</div><div style="font-size:9px;color:#4A5A70;letter-spacing:2px;text-transform:uppercase">PODCAST STUDIO</div></div>
+        </div>
+        <nav style="display:flex;gap:2px;margin-left:8px">
+          ${[['dashboard','📊','Dashboard'],['kanban','📋','Kanban'],['episodes','🎙️','Episódios']].map(([v,ic,lb])=>html`<button class=${'nav-btn'+(view===v?' active':'')} onClick=${()=>setView(v)}>${ic}<span class="hide-sm">${lb}</span></button>`)}
+        </nav>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        ${stats.late>0&&html`<div class="pulse" style="padding:4px 10px;border-radius:20px;background:rgba(255,0,60,.15);border:1px solid #FF003C66;color:#FF003C;font-size:11px;font-weight:700">⚠️ ${stats.late} atraso${stats.late>1?'s':''}</div>`}
+        <div style="display:flex;align-items:center;gap:8px;padding:5px 10px;border-radius:20px;background:rgba(0,212,255,.08);border:1px solid #00D4FF22">
+          <div class="avatar" style="width:26px;height:26px;font-size:10px">${curUser.av}</div>
+          <div class="hide-sm"><div style="font-size:12px;font-weight:700">${curUser.name}</div><div style="font-size:10px;color:#00D4FF;text-transform:uppercase;letter-spacing:1px">${curUser.role}</div></div>
+        </div>
+      </div>
+    </header>
+    <main style="padding:22px 18px;max-width:1400px;margin:0 auto">
+      ${view==='dashboard'&&html`<${Dashboard} eps=${eps} stats=${stats} setView=${setView} setModal=${setModal}/>`}
+      ${view==='kanban'&&html`<${Kanban} eps=${filt} fStatus=${fStatus} setFStatus=${setFStatus} fResp=${fResp} setFResp=${setFResp} search=${search} setSearch=${setSearch} onDragStart=${setDrag} onDrop=${onDrop} drag=${drag} onOpen=${ep=>setModal({t:'detail',ep})} setModal=${setModal}/>`}
+      ${view==='episodes'&&html`<${Episodes} eps=${filt} fStatus=${fStatus} setFStatus=${setFStatus} fResp=${fResp} setFResp=${setFResp} search=${search} setSearch=${setSearch} onOpen=${ep=>setModal({t:'detail',ep})} setModal=${setModal}/>`}
+    </main>
+    ${modal&&html`<div class="overlay" onClick=${e=>{if(e.target===e.currentTarget)setModal(null)}}>
+      ${modal.t==='detail'&&html`<${Detail} ep=${modal.ep} onClose=${()=>setModal(null)} onEdit=${()=>setModal({t:'edit',ep:modal.ep})} onDel=${delEp} onStatus=${setStatus}/>`}
+      ${(modal.t==='create'||modal.t==='edit')&&html`<${Form} ep=${modal.ep} onClose=${()=>setModal(null)} onSave=${saveEp} curUser=${curUser}/>`}
+    </div>`}
+  <//>`;
+}
+
+function Dashboard({eps,stats,setView,setModal}){
+  const prog=Math.round((stats.by.youtube+stats.by.tv)/Math.max(stats.total,1)*100);
+  const upcoming=eps.filter(e=>e.deadlinePublish&&e.status!=='youtube'&&e.status!=='tv').sort((a,b)=>new Date(a.deadlinePublish)-new Date(b.deadlinePublish)).slice(0,5);
+  return html`<div style="display:flex;flex-direction:column;gap:22px">
+    <div class="card" style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;position:relative;overflow:hidden;padding:24px 26px">
+      <div style="position:absolute;top:-50px;right:-50px;width:260px;height:260px;border-radius:50%;background:radial-gradient(#00D4FF06,transparent 70%)"/>
+      <div>
+        <div style="font-size:10px;color:#4A5A70;letter-spacing:2px;text-transform:uppercase;margin-bottom:5px">CENTRO DE CONTROLE</div>
+        <div class="orb" style="font-size:22px;color:#EAEAEA;margin-bottom:5px">Studio <span style="color:#00D4FF;text-shadow:0 0 10px #00D4FF88">OAB-PI</span></div>
+        <div style="font-size:14px;color:#7A8EAA;margin-bottom:12px">Gestão completa de produção de podcast institucional</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="pbar" style="width:170px"><div class="pbar-fill" style="width:${prog}%;background:linear-gradient(90deg,#00D4FF,#7B61FF)"/></div>
+          <span style="font-size:12px;color:#00D4FF;font-weight:700">${prog}% publicados</span>
+        </div>
+      </div>
+      <button class="btn btn-primary" style="font-size:14px;padding:11px 22px" onClick=${()=>setModal({t:'create'})}>+ Novo Episódio</button>
+    </div>
+    <div class="grid-stats">
+      ${[['🎙️','Total',stats.total,'#00D4FF',false],['✂️','Em Edição',stats.by.edicao,'#00D4FF',false],['⏳','Aguard. Aprov.',stats.by.aprovacao,'#FFD600',false],['📤','Prontos',stats.by.pronto,'#00FF94',false],['▶️','YouTube',stats.by.youtube,'#FF003C',false],['⚠️','Atrasados',stats.late,'#FF003C',stats.late>0]].map(([ic,lb,val,ac,danger])=>html`
+        <div class="stat-card" style="--ac:${ac}">
+          <div style="font-size:20px;margin-bottom:8px">${ic}</div>
+          <div class="orb" style="font-size:28px;color:${danger?'#FF003C':ac};text-shadow:0 0 12px ${ac}66">${val}</div>
+          <div style="font-size:11px;color:#7A8EAA;letter-spacing:1px;text-transform:uppercase;margin-top:4px">${lb}</div>
+        </div>`)}
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="orb" style="font-size:11px;color:#7A8EAA;margin-bottom:14px;letter-spacing:1px">STATUS DO FLUXO</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          ${SORD.map(s=>{const c=stats.by[s]||0;const p=Math.round(c/Math.max(stats.total,1)*100);return html`<div><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span style="font-size:13px">${SC[s].label}</span><span style="font-size:13px;font-weight:700;color:${SC[s].color}">${c}</span></div><div class="pbar"><div class="pbar-fill" style="width:${p}%;background:${SC[s].color}"/></div></div>`})}
+        </div>
+      </div>
+      <div class="card">
+        <div class="orb" style="font-size:11px;color:#7A8EAA;margin-bottom:14px;letter-spacing:1px">PRÓXIMOS PRAZOS</div>
+        ${upcoming.length===0&&html`<div style="color:#4A5A70;font-size:13px">Nenhum prazo pendente.</div>`}
+        <div style="display:flex;flex-direction:column;gap:9px">
+          ${upcoming.map(ep=>{const d=ddiff(ep.deadlinePublish);const late=d!==null&&d<0;const urg=d!==null&&d>=0&&d<=3;return html`
+            <div style="display:flex;justify-content:space-between;align-items:center;padding:9px 12px;border-radius:8px;background:${late?'rgba(255,0,60,.08)':'rgba(0,212,255,.04)'};border:1px solid ${late?'#FF003C33':'#1E2D45'}">
+              <div><div style="font-size:13px;font-weight:700">Ep.${ep.number} — ${ep.title.slice(0,22)}${ep.title.length>22?'…':''}</div><div style="font-size:11px;color:#7A8EAA;margin-top:2px">${SC[ep.status]?.label}</div></div>
+              <div style="font-size:12px;font-weight:900;color:${late?'#FF003C':urg?'#FFD600':'#00FF94'};text-align:right">${late?Math.abs(d)+'d atraso':d===0?'Hoje!':d+'d'}<div style="font-size:10px;color:#4A5A70;font-weight:400">${fmt(ep.deadlinePublish)}</div></div>
+            </div>`})}
+        </div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="btn btn-primary" onClick=${()=>setView('kanban')}>📋 Ver Kanban</button>
+      <button class="btn btn-primary" onClick=${()=>setView('episodes')}>🎙️ Ver Episódios</button>
+    </div>
+  </div>`;
+}
+
+function Kanban({eps,fResp,setFResp,search,setSearch,onDragStart,onDrop,drag,onOpen,setModal}){
+  const[dov,setDov]=useState(null);
+  return html`<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div class="orb" style="font-size:18px">KANBAN <span style="color:#00D4FF">BOARD</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <${Filters} fResp=${fResp} setFResp=${setFResp} search=${search} setSearch=${setSearch}/>
+        <button class="btn btn-primary" onClick=${()=>setModal({t:'create'})}>+ Novo</button>
+      </div>
+    </div>
+    <div style="overflow-x:auto;padding-bottom:14px">
+      <div style="display:flex;gap:10px;min-width:1050px">
+        ${SORD.map(s=>{const cfg=SC[s];const col=eps.filter(e=>e.status===s);return html`
+          <div style="flex:0 0 195px">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;padding:6px 10px;border-radius:6px;background:${cfg.bg};border:1px solid ${cfg.color}33">
+              <span style="font-size:11px;font-weight:700;color:${cfg.color}">${cfg.label}</span>
+              <span style="background:${cfg.color}22;color:${cfg.color};border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900">${col.length}</span>
+            </div>
+            <div class=${'k-col'+(dov===s?' dover':'')} onDragOver=${e=>{e.preventDefault();setDov(s)}} onDragLeave=${()=>setDov(null)} onDrop=${()=>{onDrop(s);setDov(null)}}>
+              ${col.map(ep=>html`<${KCard} key=${ep.id} ep=${ep} onDragStart=${()=>onDragStart(ep.id)} onClick=${()=>onOpen(ep)} dragging=${drag===ep.id}/>`)}
+            </div>
+          </div>`})}
+      </div>
+    </div>
+  </div>`;
+}
+
+function KCard({ep,onDragStart,onClick,dragging}){
+  const cfg=SC[ep.status];const d=ddiff(ep.deadlinePublish);const late=d!==null&&d<0;const r=usr(ep.responsible);
+  return html`<div class=${'ep-card'+(dragging?' dragging':'')} style="--sc:${cfg.color};margin-bottom:7px" draggable onDragStart=${onDragStart} onClick=${onClick}>
+    <div style="font-size:9px;color:#4A5A70;margin-bottom:3px;letter-spacing:1px">EP.${String(ep.number).padStart(2,'0')}</div>
+    <div style="font-size:12px;font-weight:700;margin-bottom:8px;line-height:1.3">${ep.title.slice(0,35)}${ep.title.length>35?'…':''}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="avatar" style="width:20px;height:20px;font-size:8px">${r?.av||'??'}</div>
+      ${ep.deadlinePublish&&html`<div style="font-size:10px;color:${late?'#FF003C':'#7A8EAA'};font-weight:${late?700:400}">${late?'⚠️'+Math.abs(d)+'d':'📅'+fmt(ep.deadlinePublish)}</div>`}
+    </div>
+  </div>`;
+}
+
+function Episodes({eps,fStatus,setFStatus,fResp,setFResp,search,setSearch,onOpen,setModal}){
+  return html`<div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;flex-wrap:wrap;gap:10px">
+      <div class="orb" style="font-size:18px">EPISÓDIOS <span style="color:#00D4FF">(${eps.length})</span></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <select class="bare" style="width:175px" value=${fStatus} onChange=${e=>setFStatus(e.target.value)}>
+          <option value="all">Todos os status</option>
+          ${SORD.map(s=>html`<option value=${s}>${SC[s].label}</option>`)}
+        </select>
+        <${Filters} fResp=${fResp} setFResp=${setFResp} search=${search} setSearch=${setSearch}/>
+        <button class="btn btn-primary" onClick=${()=>setModal({t:'create'})}>+ Novo</button>
+      </div>
+    </div>
+    <div class="grid-ep">${eps.map(ep=>html`<${EpCard} key=${ep.id} ep=${ep} onClick=${()=>onOpen(ep)}/>`)}</div>
+    ${eps.length===0&&html`<div style="text-align:center;padding:60px 20px;color:#4A5A70"><div style="font-size:38px;margin-bottom:10px">🎙️</div><div class="orb" style="font-size:15px">Nenhum episódio encontrado</div></div>`}
+  </div>`;
+}
+
+function EpCard({ep,onClick}){
+  const cfg=SC[ep.status];const d=ddiff(ep.deadlinePublish);const late=d!==null&&d<0&&ep.status!=='youtube'&&ep.status!=='tv';const r=usr(ep.responsible);
+  return html`<div class="ep-card" style="--sc:${cfg.color}" onClick=${onClick}>
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:9px">
+      <div><span style="font-size:10px;color:#4A5A70;letter-spacing:1px">EP.${String(ep.number).padStart(2,'0')}</span><div style="font-size:15px;font-weight:700;margin-top:2px">${ep.title}</div></div>
+      <span class="tag" style="background:${cfg.bg};color:${cfg.color};border:1px solid ${cfg.color}33;white-space:nowrap;margin-left:8px;flex-shrink:0">${cfg.label}</span>
+    </div>
+    <div style="font-size:12px;color:#7A8EAA;margin-bottom:10px;line-height:1.5">${ep.description.slice(0,88)}${ep.description.length>88?'…':''}</div>
+    <div style="display:flex;gap:5px;margin-bottom:10px;flex-wrap:wrap">
+      ${ep.guests?.slice(0,2).map((g,i)=>html`<span class="tag" style="background:rgba(123,97,255,.1);color:#7B61FF;border:1px solid #7B61FF33">👤 ${g}</span>`)}
+      ${(ep.guests?.length||0)>2&&html`<span class="tag" style="background:rgba(123,97,255,.1);color:#7B61FF;border:1px solid #7B61FF33">+${ep.guests.length-2}</span>`}
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding-top:9px;border-top:1px solid #1E2D45">
+      <div style="display:flex;align-items:center;gap:6px"><div class="avatar" style="width:22px;height:22px;font-size:9px">${r?.av}</div><span style="font-size:12px;color:#7A8EAA">${r?.name}</span></div>
+      <div style="display:flex;gap:7px;align-items:center">
+        ${ep.deadlinePublish&&html`<span style="font-size:11px;color:${late?'#FF003C':'#7A8EAA'};font-weight:${late?700:400}">${late?'⚠️ '+Math.abs(d)+'d atraso':'📅 '+fmt(ep.deadlinePublish)}</span>`}
+        ${ep.youtubeLink&&html`<span>▶️</span>`}${ep.driveLink&&html`<span>☁️</span>`}
+      </div>
+    </div>
+  </div>`;
+}
+
+function Detail({ep,onClose,onEdit,onDel,onStatus}){
+  const d=ddiff(ep.deadlinePublish);const late=d!==null&&d<0&&ep.status!=='youtube'&&ep.status!=='tv';const r=usr(ep.responsible);
+  return html`<div class="modal" style="max-width:740px">
+    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:18px">
+      <div><div style="font-size:10px;color:#4A5A70;letter-spacing:2px;text-transform:uppercase">EPISÓDIO ${String(ep.number).padStart(2,'0')}</div><div class="orb" style="font-size:19px;margin-top:4px">${ep.title}</div></div>
+      <div style="display:flex;gap:7px;flex-shrink:0;margin-left:12px">
+        <button class="btn btn-primary" onClick=${onEdit}>✏️ Editar</button>
+        <button class="btn btn-danger" onClick=${()=>{if(confirm('Remover?'))onDel(ep.id)}}>🗑️</button>
+        <button onClick=${onClose} style="background:transparent;border:none;color:#7A8EAA;cursor:pointer;font-size:19px">✕</button>
+      </div>
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#7A8EAA;text-transform:uppercase;margin-bottom:7px">Alterar Status</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        ${SORD.map(s=>html`<button onClick=${()=>onStatus(ep.id,s)} style="padding:5px 10px;border-radius:6px;cursor:pointer;background:${ep.status===s?SC[s].bg:'transparent'};border:1px solid ${ep.status===s?SC[s].color:'#1E2D45'};color:${ep.status===s?SC[s].color:'#7A8EAA'};font-size:11px;font-weight:700;font-family:'Rajdhani',sans-serif;transition:all .2s">${SC[s].label}</button>`)}
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:16px">
+      ${[['Responsável',r?.name||ep.responsible],['Gravação',fmt(ep.recordingDate)],['Prazo Edição',fmt(ep.deadlineEdit)]].map(([lb,v])=>html`<div style="padding:9px 12px;background:rgba(0,212,255,.04);border:1px solid #1E2D45;border-radius:8px"><div style="font-size:10px;color:#4A5A70;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">${lb}</div><div style="font-size:13px;font-weight:600">${v}</div></div>`)}
+      <div style="padding:9px 12px;background:rgba(0,212,255,.04);border:1px solid #1E2D45;border-radius:8px"><div style="font-size:10px;color:#4A5A70;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px">Prazo Publicação</div><div style="font-size:13px;font-weight:600;color:${late?'#FF003C':'#EAEAEA'}">${fmt(ep.deadlinePublish)}${late?' ⚠️ '+Math.abs(d)+'d':''}</div></div>
+    </div>
+    ${ep.description&&html`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#7A8EAA;text-transform:uppercase;margin-bottom:5px">Descrição</div><div style="font-size:14px;line-height:1.6">${ep.description}</div></div>`}
+    ${ep.guests?.length>0&&html`<div style="margin-bottom:14px"><div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#7A8EAA;text-transform:uppercase;margin-bottom:5px">Participantes</div><div style="display:flex;gap:5px;flex-wrap:wrap">${ep.guests.map((g,i)=>html`<span class="tag" style="background:rgba(123,97,255,.1);color:#7B61FF;border:1px solid #7B61FF33">👤 ${g}</span>`)}</div></div>`}
+    ${(ep.driveLink||ep.youtubeLink)&&html`<div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">${ep.driveLink&&html`<a href=${ep.driveLink} target="_blank" rel="noreferrer" class="btn btn-primary">☁️ Google Drive</a>`}${ep.youtubeLink&&html`<a href=${ep.youtubeLink} target="_blank" rel="noreferrer" class="btn btn-primary">▶️ YouTube</a>`}</div>`}
+    ${ep.notes&&html`<div style="margin-bottom:14px;padding:11px 13px;background:rgba(255,214,0,.06);border:1px solid #FFD60033;border-radius:8px"><div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#FFD600;text-transform:uppercase;margin-bottom:4px">Observações</div><div style="font-size:13px;line-height:1.5">${ep.notes}</div></div>`}
+    <div>
+      <div style="font-size:11px;font-weight:700;letter-spacing:1px;color:#7A8EAA;text-transform:uppercase;margin-bottom:9px">Histórico</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        ${[...ep.history].reverse().map((h,i)=>{const u=usr(h.user);return html`<div style="display:flex;gap:10px;align-items:flex-start"><div class="avatar" style="width:26px;height:26px;font-size:9px">${u?.av||'??'}</div><div><div style="font-size:13px">${h.action}</div><div style="font-size:11px;color:#4A5A70;margin-top:2px">${u?.name} · ${fmtT(h.date)}</div></div></div>`})}
+      </div>
+    </div>
+  </div>`;
+}
+
+function Form({ep,onClose,onSave,curUser}){
+  const isEdit=!!ep?.id;
+  const[f,setF]=useState(()=>ep?{...ep,guests:ep.guests?.join(', ')||''}:{title:'',number:'',description:'',status:'gravado',responsible:curUser.id,guests:'',recordingDate:'',deadlineEdit:'',deadlinePublish:'',driveLink:'',youtubeLink:'',notes:'',history:[]});
+  const s=(k,v)=>setF(p=>({...p,[k]:v}));
+  const submit=()=>{
+    if(!f.title.trim())return alert('Título obrigatório!');
+    const guests=f.guests.split(',').map(g=>g.trim()).filter(Boolean);
+    const id=ep?.id||'ep'+Date.now();
+    const history=isEdit?(ep.history||[]):[{user:curUser.id,action:'Episódio criado',date:new Date().toISOString()}];
+    if(isEdit&&f.status!==ep.status)history.push({user:curUser.id,action:'Status: '+SC[f.status].label,date:new Date().toISOString()});
+    onSave({...f,id,guests,history,number:Number(f.number)||0});
+  };
+  return html`<div class="modal">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div class="orb" style="font-size:16px">${isEdit?'✏️ EDITAR':'＋ NOVO'} <span style="color:#00D4FF">EPISÓDIO</span></div>
+      <button onClick=${onClose} style="background:transparent;border:none;color:#7A8EAA;cursor:pointer;font-size:18px">✕</button>
+    </div>
+    <div class="form-grid">
+      <div class="field span2"><label>Título *</label><input value=${f.title} onInput=${e=>s('title',e.target.value)} placeholder="Ex: Direito Digital no Século XXI"/></div>
+      <div class="field"><label>Número</label><input type="number" value=${f.number} onInput=${e=>s('number',e.target.value)} placeholder="1"/></div>
+      <div class="field"><label>Status</label><select value=${f.status} onChange=${e=>s('status',e.target.value)}>${SORD.map(st=>html`<option value=${st}>${SC[st].label}</option>`)}</select></div>
+      <div class="field"><label>Responsável</label><select value=${f.responsible} onChange=${e=>s('responsible',e.target.value)}>${USERS.map(u=>html`<option value=${u.id}>${u.name} (${u.role})</option>`)}</select></div>
+      <div class="field"><label>Data de Gravação</label><input type="date" value=${f.recordingDate} onInput=${e=>s('recordingDate',e.target.value)}/></div>
+      <div class="field"><label>Prazo de Edição</label><input type="date" value=${f.deadlineEdit} onInput=${e=>s('deadlineEdit',e.target.value)}/></div>
+      <div class="field"><label>Prazo de Publicação</label><input type="date" value=${f.deadlinePublish} onInput=${e=>s('deadlinePublish',e.target.value)}/></div>
+      <div class="field span2"><label>Participantes (separados por vírgula)</label><input value=${f.guests} onInput=${e=>s('guests',e.target.value)} placeholder="Dr. Paulo, Dra. Marina"/></div>
+      <div class="field span2"><label>Descrição</label><textarea rows="3" value=${f.description} onInput=${e=>s('description',e.target.value)} placeholder="Breve descrição..." style="resize:vertical"/></div>
+      <div class="field"><label>🔗 Google Drive</label><input value=${f.driveLink} onInput=${e=>s('driveLink',e.target.value)} placeholder="https://drive.google.com/..."/></div>
+      <div class="field"><label>▶️ YouTube</label><input value=${f.youtubeLink} onInput=${e=>s('youtubeLink',e.target.value)} placeholder="https://youtube.com/..."/></div>
+      <div class="field span2"><label>Observações</label><textarea rows="2" value=${f.notes} onInput=${e=>s('notes',e.target.value)} placeholder="Notas internas..." style="resize:vertical"/></div>
+    </div>
+    <div style="display:flex;gap:10px;margin-top:20px;justify-content:flex-end">
+      <button class="btn btn-ghost" onClick=${onClose}>Cancelar</button>
+      <button class="btn btn-primary" style="font-size:14px;padding:10px 24px" onClick=${submit}>${isEdit?'💾 Salvar':'✨ Criar Episódio'}</button>
+    </div>
+  </div>`;
+}
+
+function Filters({fResp,setFResp,search,setSearch}){
+  return html`<${Fragment}>
+    <input class="bare" value=${search} onInput=${e=>setSearch(e.target.value)} placeholder="🔍 Buscar..." style="width:145px"/>
+    <select class="bare" value=${fResp} onChange=${e=>setFResp(e.target.value)} style="width:135px">
+      <option value="all">Todos</option>
+      ${USERS.map(u=>html`<option value=${u.id}>${u.name}</option>`)}
+    </select>
+  <//>`;
+}
+
+render(html`<${App}/>`,document.getElementById('root'));
+</script>
+</body>
+</html>
